@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 
-@dataclass
+@dataclass(init=True, repr=False, eq=False)
 class InfoMessage:
     """(RU) Информационное сообщение о тренировке.
        (EN) Informational message about the training."""
@@ -14,11 +14,11 @@ class InfoMessage:
     calories: float
 
     def get_message(self) -> str:
-        message = (f'Тип тренировки: {self.training_type}; '
-                   f'Длительность: {self.duration:.3f} ч.; '
-                   f'Дистанция: {self.distance:.3f} км; '
-                   f'Ср. скорость: {self.speed:.3f} км/ч; '
-                   f'Потрачено ккал: {self.calories:.3f}.')
+        message: str = (f'Тип тренировки: {self.training_type}; '
+                        f'Длительность: {self.duration:.3f} ч.; '
+                        f'Дистанция: {self.distance:.3f} км; '
+                        f'Ср. скорость: {self.speed:.3f} км/ч; '
+                        f'Потрачено ккал: {self.calories:.3f}.')
         return message
 
 
@@ -30,9 +30,9 @@ class Training:
     VMIN: float = 60.0
 
     def __init__(self, action: int, duration: int, weight: float) -> None:
-        self.action: int = action
-        self.duration: int = duration
-        self.weight: float = weight
+        self.action = action
+        self.duration = duration
+        self.weight = weight
 
     def get_distance(self) -> float:
         """(RU) Получить дистанцию в км.
@@ -47,7 +47,8 @@ class Training:
     def get_spent_calories(self) -> float:
         """(RU) Получить количество затраченных калорий.
            (EN) Get the number of calories consumed."""
-        raise NotImplementedError()
+        raise NotImplementedError(f'Define get_spent_calories in '
+                                  f'{self.__class__.__name__} class')
 
     def show_training_info(self):
         """(RU) Вернуть информационное сообщение о выполненной тренировке.
@@ -62,8 +63,8 @@ class Training:
 class Running(Training):
     """(RU)Тренировка: бег.
        (EN) Training: running."""
-    CALL_SPD_MULTIPIER1 = 18
-    CALL_SPD_MULTIPIER2 = 20
+    CALL_SPD_MULTIPIER1: float = 18
+    CALL_SPD_MULTIPIER2: float = 20
 
     def get_spent_calories(self) -> float:
         return ((self.CALL_SPD_MULTIPIER1 * self.get_mean_speed()
@@ -74,8 +75,8 @@ class Running(Training):
 class SportsWalking(Training):
     """(RU) Тренировка: спортивная ходьба.
        (EN) Training: sports walking."""
-    CALL_SPD_MULTIPIER3 = 0.035
-    CALL_SPD_MULTIPIER4 = 0.029
+    CALL_SPD_MULTIPIER3: float = 0.035
+    CALL_SPD_MULTIPIER4: float = 0.029
 
     def __init__(self, action: int, duration: int, weight: float,
                  height: float) -> None:
@@ -92,8 +93,8 @@ class SportsWalking(Training):
 class Swimming(Training):
     """(RU) Тренировка: плавание."""
     LEN_STEP: float = 1.38
-    CALL_SPD_MULTIPLIER5 = 1.1
-    CALL_SPD_MULTIPLIER6 = 2
+    CALL_SPD_MULTIPLIER5: float = 1.1
+    CALL_SPD_MULTIPLIER6: float = 2
 
     def __init__(self,
                  action: int,
@@ -114,7 +115,8 @@ class Swimming(Training):
                 * self.CALL_SPD_MULTIPLIER6 * (self.weight))
 
 
-def read_package(workout_type: str, data: List[float]) -> Training:
+def read_package(workout_type: str,
+                 data: List[Union[int, float]]) -> Training:
     """(RU) Прочитать данные полученные от датчиков.
        (EN) Read the data received from the sensors."""
     training_types: dict[str, Training] = {
